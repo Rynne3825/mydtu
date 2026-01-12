@@ -46,11 +46,6 @@
         position: sticky;
         top: 0;
       }
-      .muted {
-        color: #666;
-        font-size: 13px;
-        margin-top: 10px;
-      }
       .msg {
         white-space: pre-wrap;
       }
@@ -65,7 +60,6 @@
   </head>
   <body>
     <h1>Admin - Contacts</h1>
-    <p class="muted">Xem danh sách tin nhắn đã lưu trong D1.</p>
 
     <div class="row">
       <input id="token" placeholder="ADMIN_TOKEN (nếu có)" size="28" />
@@ -94,11 +88,10 @@
       const statusEl = document.getElementById("status");
       const loadBtn = document.getElementById("loadBtn");
 
-      function setStatus(text) {
-        statusEl.textContent = text || "";
+      function setStatus(t) {
+        statusEl.textContent = t || "";
       }
-
-      function escapeHtml(s) {
+      function esc(s) {
         return String(s)
           .replaceAll("&", "&amp;")
           .replaceAll("<", "&lt;")
@@ -113,55 +106,42 @@
         loadBtn.disabled = true;
 
         try {
-          const token = tokenEl.value.trim();
-          const limit = Math.min(
-            parseInt(limitEl.value || "50", 10) || 50,
-            200
-          );
-
           const url = new URL("/api/contacts", location.origin);
-          url.searchParams.set("limit", String(limit));
-          if (token) url.searchParams.set("token", token);
+          url.searchParams.set(
+            "limit",
+            String(Math.min(parseInt(limitEl.value || "50", 10) || 50, 200))
+          );
+          const t = tokenEl.value.trim();
+          if (t) url.searchParams.set("token", t);
 
-          const res = await fetch(url.toString(), { method: "GET" });
-          const text = await res.text();
-          let data = {};
-          try {
-            data = JSON.parse(text);
-          } catch {}
+          const res = await fetch(url.toString());
+          const data = await res.json();
 
-          if (!res.ok || data.success !== true) {
-            throw new Error(data.error || `HTTP ${res.status}: ${text}`);
-          }
+          if (!res.ok || data.success !== true)
+            throw new Error(data.error || "HTTP " + res.status);
 
           const rows = data.results || [];
-          if (rows.length === 0) {
-            setStatus("Không có dữ liệu");
-            return;
-          }
+          setStatus("OK: " + rows.length + " dòng");
 
           for (const r of rows) {
             const tr = document.createElement("tr");
             tr.innerHTML = `
-              <td>${escapeHtml(r.id)}</td>
-              <td>${escapeHtml(r.name)}</td>
-              <td>${escapeHtml(r.email)}</td>
-              <td class="msg">${escapeHtml(r.message)}</td>
-              <td>${escapeHtml(r.created_at)}</td>
-            `;
+            <td>${esc(r.id)}</td>
+            <td>${esc(r.name)}</td>
+            <td>${esc(r.email)}</td>
+            <td class="msg">${esc(r.message)}</td>
+            <td>${esc(r.created_at)}</td>
+          `;
             tbody.appendChild(tr);
           }
-
-          setStatus(`OK: ${rows.length} dòng`);
-        } catch (err) {
-          setStatus("Lỗi: " + err.message);
+        } catch (e) {
+          setStatus("Lỗi: " + e.message);
         } finally {
           loadBtn.disabled = false;
         }
       }
 
       loadBtn.addEventListener("click", loadContacts);
-      // auto load (nếu không dùng token, hoặc bạn đã nhập token)
       loadContacts();
     </script>
   </body>
