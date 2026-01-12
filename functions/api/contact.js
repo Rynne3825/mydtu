@@ -1,44 +1,46 @@
-export async function onRequestGet({ request, env }) {
+export async function onRequestPost({ request, env }) {
   try {
-    // 1) Simple token auth via query: /api/contacts?token=...
-    const url = new URL(request.url);
-    const token = url.searchParams.get("token");
-    const expected = env.ADMIN_TOKEN;
+    const body = await request.json();
+    const { name, email, message } = body;
 
-    // Nếu chưa set ADMIN_TOKEN trên Pages, cứ tạm bỏ auth bằng cách comment khối này.
-    if (expected && token !== expected) {
+    if (!name || !email || !message) {
       return new Response(
-        JSON.stringify({ success: false, error: "Unauthorized" }),
+        JSON.stringify({ success: false, error: "Missing fields" }),
         {
-          status: 401,
+          status: 400,
           headers: { "Content-Type": "application/json" },
         }
       );
     }
 
-    // 2) Read latest contacts
-    const limit = Math.min(
-      parseInt(url.searchParams.get("limit") || "50", 10) || 50,
-      200
-    );
-
-    const { results } = await env.DB.prepare(
-      "SELECT id, name, email, message, created_at FROM contacts ORDER BY id DESC LIMIT ?"
+    await env.DB.prepare(
+      "INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)"
     )
-      .bind(limit)
-      .all();
+      .bind(name, email, message)
+      .run();
 
-    return new Response(JSON.stringify({ success: true, results }), {
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     return new Response(
-      JSON.stringify({ success: false, error: err.message }),
+      JSON.stringify({ success: false, error: err?.message || String(err) }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
       }
     );
   }
+}
+
+// (tuỳ chọn) Cho GET để kiểm tra nhanh: /api/contact
+export async function onRequestGet() {
+  return new Response(
+    JSON.stringify({ ok: true, hint: "POST JSON to this endpoint" }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }
