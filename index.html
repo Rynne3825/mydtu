@@ -64,7 +64,12 @@
     <h1>Contact form</h1>
     <p class="muted">Gửi thử một tin nhắn để kiểm tra lưu dữ liệu vào D1.</p>
 
-    <form id="contactForm">
+    <form
+      id="contactForm"
+      method="post"
+      action="/api/contact"
+      onsubmit="return false;"
+    >
       <div class="row">
         <div>
           <label for="name">Tên</label>

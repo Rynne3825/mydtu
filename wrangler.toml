@@ -1,5 +1,7 @@
+name = "mydtu"
+compatibility_date = "2025-01-01"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "mydtu-db"
 database_id = "6ab5a23b-6a40-40a2-b010-f4776606906f"
-functions/api/contact.js
