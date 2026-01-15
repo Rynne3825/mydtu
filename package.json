@@ -1,0 +1,29 @@
+{
+  "name": "mydtu-slot-monitor",
+  "version": "1.0.0",
+  "description": "MyDTU Slot Monitor - Hệ thống giám sát slot tín chỉ",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 execute mydtu-db --local --file=./src/db/schema.sql",
+    "db:migrate:prod": "wrangler d1 execute mydtu-db --remote --file=./src/db/schema.sql",
+    "test": "vitest",
+    "test:parser": "vitest run src/services/parser.test.ts"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "@hono/zod-validator": "^0.4.0",
+    "zod": "^3.24.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.0",
+    "linkedom": "^0.18.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "wrangler": "^3.99.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}

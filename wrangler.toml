@@ -1,7 +1,24 @@
-name = "mydtu"
-compatibility_date = "2025-01-01"
+name = "mydtu-slot-monitor"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
 
+# Cron trigger - chạy mỗi 10 phút
+[triggers]
+crons = ["*/10 * * * *"]
+
+# D1 Database binding
 [[d1_databases]]
 binding = "DB"
 database_name = "mydtu-db"
 database_id = "6ab5a23b-6a40-40a2-b010-f4776606906f"
+
+# Environment variables (sẽ được set qua wrangler secret)
+[vars]
+ENVIRONMENT = "development"
+
+# Assets for static files (frontend)
+[assets]
+directory = "./public"
+binding = "ASSETS"
+# Let Worker handle all requests, then fetch from assets as needed
+serve_directly = false
